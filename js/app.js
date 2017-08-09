@@ -164,38 +164,30 @@ function hasSubstring(string, substring){
 function AppViewModel() {
     var self = this;
 
-    //self.obsList = ko.observableArray(places);
-
+    //Function tha filters the list of places
     function filter(){
     	var resultsList = [];
+    	self.obsResults = ko.mapping.fromJS(resultsList);
+    	//Search for matches in the array
     	for (i = 0; i < places.length; i++){
     		//if the name or initials contains the search string
     		if (hasSubstring(places[i].name, self.search()) || hasSubstring(places[i].initials, self.search())) {
     			//push the object to the new array
-    			resultsList.push(places[i]);
+    			self.obsResults.push(places[i]);
     		}
     	}
-    	console.log(resultsList);
-    	return  resultsList;
+    	return  self.obsResults();
 	}
- 
+
     self.title = ko.observable("Neighborhood Map");
     self.search = ko.observable("");
-    
 
-    self.comp = ko.computed(function(){
-    	filter();
-    	return self.search();
-    }, self).extend({ throttle: 800 });
+   	//updates the list
+    self.compResults = ko.computed(function(){
+    	return filter();
+    },self);
 
-    console.log(places);
-    var list = document.getElementById("results");
-    list.style.display = 'block';
-    for (i = 0; i < places.length; i++){
-    	var newElement = document.createElement("li");
-    	newElement.innerHTML = places[i].initials;
-    	list.appendChild(newElement);
-    }
+
 
     //Search in Places API
    	self.searchPlacesAPI = function () {
