@@ -3,35 +3,35 @@ var places = [
 	{
 		"name" : "Instituto de Matematica e Estatistica",
 		"initials" : "IME",
-		"coords" : {"lat" : 0000, "lng": 0000}
+		"coords" : {"lat" : -23.559276, "lng": -46.731292}
 	},
 	{
 		"name" : "Faculdade de Arquitetura e Urbanismo",
 		"initials" : "FAU",
-		"coords" : {"lat" : 000, "lng" : 0000}
+		"coords" : {"lat" : -23.560191, "lng" : -46.729939}
 	},
 	{
 		"name" : "Instituto de Quimica",
 		"initials" : "IQ",
-		"coords" : {"lat" : 000, "lng" : 0000}
+		"coords" : {"lat" : -23.564750, "lng" : -46.726121}
 	},
 	{
 		"name" : "Escola Politecnica",
 		"initials" : "Poli",
-		"coords" : {"lat" : 000, "lng" : 0000}
+		"coords" : {"lat" : -23.557037, "lng" : -46.732809}
 	},
 	{
 		"name" : "Instituto de Biologia",
 		"initials" : "IB",
-		"coords" : {"lat" : 000, "lng" : 0000}
+		"coords" : {"lat" : -23.564911, "lng" : -46.730179}
 	}
 	];
-
+var markers = [];
 
 var map;
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
-		center: {lat: 0, lng:0},
+		center: {lat: -23.561155, lng:-46.731033},
 		zoom:15,
 		styles: [
 			    {
@@ -130,26 +130,30 @@ function initMap() {
 			]
 	});
 
-	var usp = {lat: -23.561155, lng:-46.731033};
+	//var bounds = new google.maps.LatLngBounds();
 
-	var bounds = new google.maps.LatLngBounds();
+	for (i = 0; i < places.length; i++){
+		var marker = new google.maps.Marker({
+			position: places[i].coords,
+			map: map,
+			title: places[i].initials
+		});
 
-	var marker = new google.maps.Marker({
-		position: usp,
-		map:map,
-		title: 'USP'
-	});
+		var infowindow = new google.maps.InfoWindow();
 
-	bounds.extend(marker.position);
-	map.fitBounds(bounds);
+		marker.addListener('click', function(){
+			infowindow.open(map, this);
+		});
 
-	var infowindow = new google.maps.InfoWindow({
-		content: 'Universidade de Sao Paulo'
-	});
+		markers.push(marker);
+	}
 
-	marker.addListener('click', function(){
-		infowindow.open(map, marker);
-	});
+	//bounds.extend(marker.position);
+	//map.fitBounds(bounds);
+}
+
+function populateInfoWindow(marker, infowindow){
+
 }
 
 function hasSubstring(string, substring){
@@ -174,6 +178,14 @@ function AppViewModel() {
     		if (hasSubstring(places[i].name, self.search()) || hasSubstring(places[i].initials, self.search())) {
     			//push the object to the new array
     			self.obsResults.push(places[i]);
+    			if (markers.length > 0){
+    				markers[i].setMap(map);
+    			}
+    		}
+    		else {
+    			if (markers.length > 0){
+    				markers[i].setMap(null);
+    			}
     		}
     	}
     	return  self.obsResults();
