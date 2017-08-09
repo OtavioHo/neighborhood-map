@@ -1,0 +1,12 @@
+{"places": 
+	[{
+		"name": "Instituto de Matematica e Estatistica",
+	  	"initials": "IME",
+	  	"coords": {"lat" : "0000", "lgn" : "00000"}
+	 },
+	 {
+	 	"name": "Faculdade de Arquitetura e Urbanismo",
+	 	"initials": "FAU",
+	 	"coords": {"lat": 0000, "lgn": 0000}
+	 }]
+}

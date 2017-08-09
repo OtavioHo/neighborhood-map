@@ -7,8 +7,15 @@
 <body>
 	<div id="menu">
 		<strong data-bind="text: title"></strong>
+		<hr>
+		<input type="text" data-bind="textInput: search">
+		<div id="results">
+		<span data-bind="text: comp"></span><br>
+		</div>
+		<hr>
 	</div>
 	<div id="map"></div>
+<script src="js/jquery.min.js"></script>
 <script src="js/knockout.js"></script>
 <script src="js/app.js"></script>
 <script async defer
