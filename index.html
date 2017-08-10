@@ -4,29 +4,43 @@
 	<title>Neighborhood Map</title>
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 	<link href="https://fonts.googleapis.com/css?family=Roboto:100i,400" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
-	<div id="menu">
-		<strong data-bind="text: title"></strong>
-		<hr>
-		<input type="text" data-bind="textInput: search">
-		<div id="results">
-		<ul data-bind="foreach: compResults">
-			<li data-bind="click: $parent.bounceMarker">
-				<span data-bind="text: initials"></span><br>
-				<span data-bind="text: name" class="subtitle"></span>
-			</li>
-		</ul>
+	<div class="main">
+		<div id="menu">
+			<div style="height: ">
+			<strong data-bind="text: title"></strong><br>
+			<span data-bind="text: subtitle" class="subtitle"></span>
+			<hr>
+			</div>
+			<input type="text" data-bind="textInput: search">
+			<div id="results">
+			<ul data-bind="foreach: compResults">
+				<li data-bind="click: $parent.bounceMarker">
+					<span data-bind="text: initials"></span><br>
+					<span data-bind="text: name" class="subtitle"></span>
+				</li>
+			</ul>
+			</div>
+			<hr>
+			<div class="insta-div">
+				<p class="instagram-title">Instagram</p>
+				<div id="insta">
+					<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram"> <span style="font-family: Roboto;"> | SignUp with Instagram</span></a>
+				</div>
+				<div id="logged" style="display: none">
+					<span>Welcome,</span><span id="username"></span><br><br>
+					<img class="profile_pic" id="prof">
+					<hr>
+					<div id="usp-thumbs">
+						<span class="subtitle">Some pics at USP:</span><br>
+					</div>
+				</div>
+			</div>
 		</div>
-		<hr>
-		<div id="insta">
-			<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content">log in instagram</a>
-		</div>
-		<div id="logged" style="display: none">
-			<span> You are logged in as:</span><br>
-		</div>
+		<div id="map"></div>
 	</div>
-	<div id="map"></div>
 <script src="js/jquery.min.js"></script>
 <script src="js/knockout.js"></script>
 <script src="js/komapplugin.js"></script>
