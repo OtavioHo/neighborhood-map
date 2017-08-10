@@ -1,26 +1,31 @@
 //places oject
 var places = [
 	{
+		"index" : "0",
 		"name" : "Instituto de Matematica e Estatistica",
 		"initials" : "IME",
 		"coords" : {"lat" : -23.559276, "lng": -46.731292}
 	},
 	{
+		"index" : "1",
 		"name" : "Faculdade de Arquitetura e Urbanismo",
 		"initials" : "FAU",
 		"coords" : {"lat" : -23.560191, "lng" : -46.729939}
 	},
 	{
+		"index" : "2",
 		"name" : "Instituto de Quimica",
 		"initials" : "IQ",
 		"coords" : {"lat" : -23.564750, "lng" : -46.726121}
 	},
 	{
+		"index" : "3",
 		"name" : "Escola Politecnica",
 		"initials" : "Poli",
 		"coords" : {"lat" : -23.557037, "lng" : -46.732809}
 	},
 	{
+		"index" : "4",
 		"name" : "Instituto de Biologia",
 		"initials" : "IB",
 		"coords" : {"lat" : -23.564911, "lng" : -46.730179}
@@ -43,7 +48,8 @@ $(document).ready(function(){
 			data: {access_token: token},
 			success: function(data){
 				$("#logged").append(data.data.username);
-				console.log(data.data.username);
+				$("#logged").append("<img src='" + data.data.profile_picture + "' class='profile_pic'>")
+				console.log(data);
 			},
 			error: function(data){
 				console.log(data);
@@ -69,13 +75,13 @@ function userId(token){
 	return false;
 }
 
-console.log(userId(loggedIn(url)));
-
 var map;
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: -23.561155, lng:-46.731033},
 		zoom:15,
+		draggable: false,
+		scrollwheel: false,
 		styles: [
 			    {
 			        "featureType": "administrative",
@@ -173,25 +179,48 @@ function initMap() {
 			]
 	});
 
-	//var bounds = new google.maps.LatLngBounds();
+	//icon  imgs
+	var markerImg = "/img/marker.png";
+	var markerHighImg = "/img/marker_high.png";
 
+	//creating markers
 	for (i = 0; i < places.length; i++){
 		var marker = new google.maps.Marker({
 			position: places[i].coords,
 			map: map,
-			title: places[i].initials
+			animation: google.maps.Animation.DROP,
+			icon: markerImg,
+			title: places[i].initials,
 		});
 
 		var infowindow = new google.maps.InfoWindow();
+		var labelwindow = new google.maps.InfoWindow();
+
+		google.maps.event.addDomListener(document.getElementById("menu"), 'click', function(){
+			infowindow.close();
+			map.setCenter({lat:-23.561273, lng:-46.730958});
+		})
 
 		marker.addListener('click', function(){
 			populateInfoWindow(this, infowindow);
+			this.setAnimation(null);
+			labelwindow.close();
 		});
+
+		marker.addListener('mouseover', function(){
+			this.setIcon(markerHighImg);
+			this.setAnimation(null);
+			labelwindow.setContent(this.title);
+			labelwindow.open(map, this);
+		});
+
+		marker.addListener('mouseout', function(){
+			this.setIcon(markerImg);
+			labelwindow.close();
+		})
+
 		markers.push(marker);
 	}
-
-	//bounds.extend(marker.position);
-	//map.fitBounds(bounds);
 }
 
 function populateInfoWindow(marker, infowindow){
@@ -220,32 +249,36 @@ function populateInfoWindow(marker, infowindow){
         		data: {access_token: loggedIn(url), lat: marker.position.lat, lng: marker.position.lng},
         		success: function(data){
         			//get the id of the first place in the list
-        			var placeId = data.data[0].id;
-        			//request the recent media of the place
-        			$.ajax({
-        				url: "https://api.instagram.com/v1/locations/" + placeId + "/media/recent",
-        				dataType: "jsonp",
-        				type: "GET",
-        				//had to use a diferent token for authorization purpose
-        				data: {access_token: "327238536.e029fea.868198a8006b4c0bbab397174aa761d5"},
-        				success: function(data){
-        					console.log(data);
-        					for (i = 0; i < 9; i++){
-        						var imgId = "#thumb-" + i;
-        						if (data.data[i]) {
-        							$(imgId).show().attr("src",data.data[i].images.thumbnail.url);
-        						} else {
-        							$(imgId).hide();
-        						}
-        					}
-        				},
-        				error: function(data){
-        					console.log(data);
-        				}
-        			})
+        			if (loggedIn(url)){
+	        			var placeId = data.data[0].id;
+	        			//request the recent media of the place
+	        			$.ajax({
+	        				url: "https://api.instagram.com/v1/locations/" + placeId + "/media/recent",
+	        				dataType: "jsonp",
+	        				type: "GET",
+	        				//had to use a diferent token for authorization purpose
+	        				data: {access_token: "327238536.e029fea.868198a8006b4c0bbab397174aa761d5"},
+	        				success: function(data){
+	        					console.log(data);
+	        					for (i = 0; i < 9; i++){
+	        						var imgId = "#thumb-" + i;
+	        						if (data.data[i]) {
+	        							$(imgId).show().attr("src",data.data[i].images.thumbnail.url);
+	        						} else {
+	        							$(imgId).hide();
+	        						}
+	        					}
+	        				},
+	        				error: function(data){
+	        					infowindow.setContent("Some error occured with the instagram API");	
+	        				}
+	        			})
+        			} else {
+        				infowindow.setContent("log in on Instagran first");
+        			}
         		},
         		error: function(data){
-        			console.log(data);	
+        			infowindow.setContent("Some error occured with the instagram API");	
         		}
         	})
         	infowindow.open(map, marker);
@@ -261,11 +294,23 @@ function hasSubstring(string, substring){
 	return false;
 }
 
+function bounce(index){
+	if (markers[index].getAnimation() !== null) {
+        markers[index].setAnimation(null);
+    } else {
+        markers[index].setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function(){ markers[index].setAnimation(null); }, 750);
+    }
+}
+
 function AppViewModel() {
     var self = this;
 
-    //Function tha filters the list of places
-    function filter(){
+    self.title = ko.observable("Neighborhood Map");
+    self.search = ko.observable("");
+
+   	//updates the list
+    self.compResults = ko.computed(function(){
     	var resultsList = [];
     	self.obsResults = ko.mapping.fromJS(resultsList);
     	//Search for matches in the array
@@ -276,6 +321,8 @@ function AppViewModel() {
     			self.obsResults.push(places[i]);
     			if (markers.length > 0){
     				markers[i].setMap(map);
+    				markers[i].setAnimation(null);
+    				markers[i].setAnimation(google.maps.Animation.DROP);
     			}
     		}
     		else {
@@ -284,25 +331,17 @@ function AppViewModel() {
     			}
     		}
     	}
-    	return  self.obsResults();
-	}
-
-    self.title = ko.observable("Neighborhood Map");
-    self.search = ko.observable("");
-
-   	//updates the list
-    self.compResults = ko.computed(function(){
-    	return filter();
+    	if (self.obsResults().length > 0){
+    		return self.obsResults();
+    	} else{
+    		self.obsResults.push({initials: "No results found!"});
+    		return self.obsResults();
+    	}
     },self);
 
-
-
-    //Search in Places API
-   	self.searchPlacesAPI = function () {
-   		var results = document.getElementById("results");
-   		var resultsList;
-
-   		results.innerHTML = resultsList;
+    self.bounceMarker = function(){
+    	var index = this.index;
+    	bounce(index);
     }
 
 }

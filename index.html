@@ -3,6 +3,7 @@
 <head>
 	<title>Neighborhood Map</title>
 	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100i,400" rel="stylesheet">
 </head>
 <body>
 	<div id="menu">
@@ -10,9 +11,11 @@
 		<hr>
 		<input type="text" data-bind="textInput: search">
 		<div id="results">
-		<span data-bind="text: search"></span><br>
 		<ul data-bind="foreach: compResults">
-			<li data-bind="text: initials"></li>
+			<li data-bind="click: $parent.bounceMarker">
+				<span data-bind="text: initials"></span><br>
+				<span data-bind="text: name" class="subtitle"></span>
+			</li>
 		</ul>
 		</div>
 		<hr>
