@@ -1,6 +1,6 @@
 # Neighborhood APP - Udacity
 
-##Description
+## Description
 This App works with the Google maps API to show some important places in a neighborhood.
 
 ## Whats Included

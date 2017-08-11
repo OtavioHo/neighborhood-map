@@ -70,7 +70,11 @@ var places = [
 var markers = [];
 var url = window.location.href;
 
-$(document).ready(function(){
+var infowindow;
+var labelwindow;
+var infowindowlist;
+
+$(document).ready(function(e){
 	var token = loggedIn(url);
 	if (token){
 		$("#insta").hide();
@@ -91,7 +95,7 @@ $(document).ready(function(){
 						url: "https://api.instagram.com/v1/locations/221343661/media/recent", //USP id
         				dataType: "jsonp",
 		        		type: "GET",
-		        		data: {access_token: "327238536.e029fea.868198a8006b4c0bbab397174aa761d5"},
+		        		data: {access_token: loggedIn(url)},
 		        		success: function(data){
 		        			for (i = 0; i < 16; i++){
 	        						if (data.data[i]) {
@@ -115,6 +119,11 @@ $(document).ready(function(){
 			}
 		});
 	}
+	$("#open_menu").click(function(){
+		var status = $("#menu").css("display");
+			$("#menu").slideToggle();
+			$("#map").slideToggle();
+	});
 });
 
 //verify if the user is logged in on instagram
@@ -355,10 +364,12 @@ function initMap() {
 				    }
 				]						
 	});
-
+	infowindow = new google.maps.InfoWindow();
+	labelwindow = new google.maps.InfoWindow();
+	infowindowlist = new google.maps.InfoWindow();
 	//icon  imgs
-	var markerImg = "/img/marker.png";
-	var markerHighImg = "/img/marker_high.png";
+	var markerImg = "img/marker.png";
+	var markerHighImg = "img/marker_high.png";
 
 	//populate markers array
 	for (i = 0; i < places.length; i++){
@@ -368,26 +379,24 @@ function initMap() {
 			animation: google.maps.Animation.DROP,
 			icon: markerImg,
 			title: places[i].initials,
-			description: places[i].name
+			description: places[i].name,
+			index: i
 		});
-
-		var infowindow = new google.maps.InfoWindow();
-		var labelwindow = new google.maps.InfoWindow();
 
 		google.maps.event.addDomListener(document.getElementById("menu"), 'click', function(){
 			infowindow.close();
 			//map.setCenter({lat:-23.561273, lng:-46.730958});
-		})
+		});
 
 		marker.addListener('click', function(){
 			populateInfoWindow(this, infowindow);
-			this.setAnimation(null);
+			bounce(this.index);
 			labelwindow.close();
+			infowindowlist.close();
 		});
 
 		marker.addListener('mouseover', function(){
 			this.setIcon(markerHighImg);
-			this.setAnimation(null);
 			labelwindow.setContent(this.title);
 			labelwindow.open(map, this);
 		});
@@ -395,7 +404,7 @@ function initMap() {
 		marker.addListener('mouseout', function(){
 			this.setIcon(markerImg);
 			labelwindow.close();
-		})
+		});
 
 		markers.push(marker);
 	}
@@ -412,7 +421,7 @@ function populateInfoWindow(marker, infowindow){
         	content += "<span class='subtitle'>Instagram pics at this place:</span><br><br>"
         	content += "<div class='infowindow'>";
         	for (i = 0; i < 9; i++){
-        		content += '<img src="/img/loading.gif" class="thumbs" id="thumb-'+ i +'">';
+        		content += '<img src="img/loading.gif" class="thumbs" id="thumb-'+ i +'">';
         	}
         	content += "</div>";
         	infowindow.setContent(content);
@@ -438,7 +447,7 @@ function populateInfoWindow(marker, infowindow){
 	        				dataType: "jsonp",
 	        				type: "GET",
 	        				//had to use a diferent token for authorization purpose
-	        				data: {access_token: "327238536.e029fea.868198a8006b4c0bbab397174aa761d5"},
+	        				data: {access_token: loggedIn(url)},
 	        				success: function(data){
 	        					console.log(data);
 	        					for (i = 0; i < 9; i++){
@@ -453,7 +462,7 @@ function populateInfoWindow(marker, infowindow){
 	        				error: function(data){
 	        					infowindow.setContent("Some error occured with the instagram API");	
 	        				}
-	        			})
+	        			});
         			} else {
         				infowindow.setContent('<div style="width: 150px"><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
         			}
@@ -478,12 +487,8 @@ function hasSubstring(string, substring){
 
 //Animate the marker to BOUNCE
 function bounce(index){
-	if (markers[index].getAnimation() !== null) {
-        markers[index].setAnimation(null);
-    } else {
-        markers[index].setAnimation(google.maps.Animation.BOUNCE);
-        setTimeout(function(){ markers[index].setAnimation(null); }, 750);
-    }
+    markers[index].setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(function(){ markers[index].setAnimation(null); }, 750);
 }
 
 function AppViewModel() {
@@ -531,6 +536,7 @@ function AppViewModel() {
     	map.setCenter(markers[index].getPosition());
     	map.setZoom(16);
     	bounce(index);
+    	populateInfoWindow(markers[index], infowindowlist);
     }
 }
 
