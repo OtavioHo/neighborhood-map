@@ -87,7 +87,6 @@ $(document).ready(function(e){
 			type: 'GET',
 			data: {access_token: token},
 			success: function(data){
-				console.log(data);
 				if(data.meta.code == 200){
 					$("#username").append(" "+ data.data.full_name);
 					$("#prof").attr("src", data.data.profile_picture);
@@ -97,21 +96,24 @@ $(document).ready(function(e){
 		        		type: "GET",
 		        		data: {access_token: loggedIn(url)},
 		        		success: function(data){
-		        			for (i = 0; i < 16; i++){
-	        						if (data.data[i]) {
-	        							console.log(data.data[i]);
-	        							$("#usp-thumbs").append('<img src="'+data.data[i].images.thumbnail.url+'" class="thumbs">');
-	        						} else {
-	        							
-	        						}
-	        					}
+		        			console.log(data);
+		        			if (data.meta.code == 200){
+			        			for (i = 0; i < 16; i++){
+		        						if (data.data[i]) {
+		        							//console.log(data.data[i]);
+		        							$("#usp-thumbs").append('<img src="'+data.data[i].images.thumbnail.url+'" class="thumbs">');
+		        						}
+		        					}
+		        				} else {
+		        					$("#logged").append("Error to comunicate with Instagram API: " + data.meta.code + " - " + data.meta.error_message + '<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a>');
+		        				}
 		        		},
 		        		error: function(data){
 		        			alert("ERROR:" + data);
 		        		}
 					});
 				} else {
-					$("#logged").append("Error");
+					$("#logged").append("Error to comunicate with Instagram API: " + data.meta.code + " - " + data.meta.error_message + '<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a>');
 				}
 			},
 			error: function(data){
@@ -454,13 +456,17 @@ function populateInfoWindow(marker, infowindow){
 	        				data: {access_token: loggedIn(url)},
 	        				success: function(data){
 	        					console.log(data);
-	        					for (i = 0; i < 9; i++){
-	        						var imgId = "#thumb-" + i;
-	        						if (data.data[i]) {
-	        							$(imgId).show().attr("src",data.data[i].images.thumbnail.url);
-	        						} else {
-	        							$(imgId).hide();
-	        						}
+	        					if (data.meta.code == 200){
+		        					for (i = 0; i < 9; i++){
+		        						var imgId = "#thumb-" + i;
+		        						if (data.data[i]) {
+		        							$(imgId).show().attr("src",data.data[i].images.thumbnail.url);
+		        						} else {
+		        							$(imgId).hide();
+		        						}
+		        					}
+	        					} else {
+	        						infowindow.setContent('<div style="width: 150px"><p>Error:' + data.meta.code + ' - ' + data.meta.error_message + ' </p><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
 	        					}
 	        				},
 	        				error: function(data){
@@ -468,7 +474,7 @@ function populateInfoWindow(marker, infowindow){
 	        				}
 	        			});
         			} else {
-        				infowindow.setContent('<div style="width: 150px"><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
+        				infowindow.setContent('<div style="width: 150px"><p>Error:' + data.meta.code + ' - ' + data.meta.error_message + ' </p><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
         			}
         		},
         		error: function(data){
