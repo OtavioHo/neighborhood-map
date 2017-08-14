@@ -107,18 +107,17 @@ $(document).ready(function(e){
 		        				} else {
 		        					$("#logged").append("Error to comunicate with Instagram API: " + data.meta.code + " - " + data.meta.error_message + '<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a>');
 		        				}
-		        		},
-		        		error: function(data){
-		        			alert("ERROR:" + data);
 		        		}
+					}).fail(function(data){
+						alert("Error: " + data.meta.code + " - " + data.meta.error_message);
 					});
 				} else {
 					$("#logged").append("Error to comunicate with Instagram API: " + data.meta.code + " - " + data.meta.error_message + '<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a>');
+					alert("Error: " + data.meta.code + " - " + data.meta.error_message);
 				}
-			},
-			error: function(data){
-				alert("ERROR:" + data);
 			}
+		}).fail(function(data){
+			alert("Error: " + data.meta.code + " - " + data.meta.error_message);
 		});
 	}
 	$("#open_menu").click(function(){
@@ -416,6 +415,11 @@ function initMap() {
 	}
 }
 
+function instaInfoError(data, infowindow){
+	alert("Error: " + data.meta.code + " - " + data.meta.error_message);
+	infowindow.setContent('<div style="width: 150px"><p>Error:' + data.meta.code + ' - ' + data.meta.error_message + ' </p><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
+}
+
 //populate the infowindow
 function populateInfoWindow(marker, infowindow){
 	// from Project_Code_10_DisplayingRoutesDirectionsService.html on the project github
@@ -466,21 +470,19 @@ function populateInfoWindow(marker, infowindow){
 		        						}
 		        					}
 	        					} else {
-	        						infowindow.setContent('<div style="width: 150px"><p>Error:' + data.meta.code + ' - ' + data.meta.error_message + ' </p><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
+	        						instaInfoError(data, infowindow);
 	        					}
-	        				},
-	        				error: function(data){
-	        					infowindow.setContent("Some error occured with the instagram API");	
 	        				}
+	        			}).fail(function(){
+	        				instaInfoError(data, infowindow);
 	        			});
         			} else {
-        				infowindow.setContent('<div style="width: 150px"><p>Error:' + data.meta.code + ' - ' + data.meta.error_message + ' </p><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
+        				infowindow.setContent('<div style="width: 150px"><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
         			}
-        		},
-        		error: function(data){
-        			infowindow.setContent("Some error occured with the instagram API");	
         		}
-        	})
+        	}).fail(function(data){
+        		instaInfoError(data, infowindow);
+        	});
         	infowindow.open(map, marker);
 		}
 }
