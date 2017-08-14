@@ -107,7 +107,7 @@ $(document).ready(function(e){
 	        					}
 		        		},
 		        		error: function(data){
-		        			console.log(data);
+		        			alert("ERROR:" + data);
 		        		}
 					});
 				} else {
@@ -115,7 +115,7 @@ $(document).ready(function(e){
 				}
 			},
 			error: function(data){
-				console.log(data);
+				alert("ERROR:" + data);
 			}
 		});
 	}
@@ -125,6 +125,10 @@ $(document).ready(function(e){
 			$("#map").slideToggle();
 	});
 });
+
+function googleError(){
+	alert("Failed to comunicate with google maps API");
+}
 
 //verify if the user is logged in on instagram
 //returns the access token or false
