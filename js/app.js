@@ -86,7 +86,9 @@ $(document).ready(function(e){
 			dataType: 'jsonp',
 			type: 'GET',
 			data: {access_token: token},
-			success: function(data){
+			timeout: 3000
+		}).done(function(data){
+				console.log(data);
 				if(data.meta.code == 200){
 					$("#username").append(" "+ data.data.full_name);
 					$("#prof").attr("src", data.data.profile_picture);
@@ -95,31 +97,31 @@ $(document).ready(function(e){
         				dataType: "jsonp",
 		        		type: "GET",
 		        		data: {access_token: loggedIn(url)},
-		        		success: function(data){
-		        			console.log(data);
-		        			if (data.meta.code == 200){
-			        			for (i = 0; i < 16; i++){
-		        						if (data.data[i]) {
-		        							//console.log(data.data[i]);
-		        							$("#usp-thumbs").append('<img src="'+data.data[i].images.thumbnail.url+'" class="thumbs">');
-		        						}
-		        					}
-		        				} else {
-		        					$("#logged").append("Error to comunicate with Instagram API: " + data.meta.code + " - " + data.meta.error_message + '<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a>');
-		        				}
-		        		}
-					}).fail(function(data){
-						alert("Error: " + data.meta.code + " - " + data.meta.error_message);
-					});
+		        		timeout: 3000
+		        	}).done(function(data){
+			        			console.log(data);
+			        			if (data.meta.code == 200){
+				        			for (i = 0; i < 16; i++){
+			        						if (data.data[i]) {
+			        							//console.log(data.data[i]);
+			        							$("#usp-thumbs").append('<img src="'+data.data[i].images.thumbnail.url+'" class="thumbs">');
+			        						}
+			        					}
+			        				} else {
+			        					$("#logged").append("Error to comunicate with Instagram API: " + data.meta.code + " - " + data.meta.error_message + '<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a>');
+			        				}
+		        			}).fail(function(){
+								instaInfoError();
+							});
 				} else {
-					$("#logged").append("Error to comunicate with Instagram API: " + data.meta.code + " - " + data.meta.error_message + '<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a>');
-					alert("Error: " + data.meta.code + " - " + data.meta.error_message);
+					//$("#logged").append("Error to comunicate with Instagram API: " + data.meta.code + " - " + data.meta.error_message + '<a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a>');
+					alert("Error: " + data);
 				}
-			}
 		}).fail(function(data){
-			alert("Error: " + data.meta.code + " - " + data.meta.error_message);
+			instaInfoError();
+			console.log(data);
 		});
-	}
+	}	
 	$("#open_menu").click(function(){
 		var status = $("#menu").css("display");
 			$("#menu").slideToggle();
@@ -415,9 +417,8 @@ function initMap() {
 	}
 }
 
-function instaInfoError(data, infowindow){
-	alert("Error: " + data.meta.code + " - " + data.meta.error_message);
-	infowindow.setContent('<div style="width: 150px"><p>Error:' + data.meta.code + ' - ' + data.meta.error_message + ' </p><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
+function instaInfoError(){
+	alert("Error: instagram api not availble");
 }
 
 //populate the infowindow
@@ -427,14 +428,6 @@ function populateInfoWindow(marker, infowindow){
 	 if (infowindow.marker != marker) {
         	// Clear the infowindow content to give the streetview time to load.
         	infowindow.setContent('');
-        	var content = "<span>" + marker.title +" </span><br><span class='subtitle'>" + marker.description + "</span><hr>";
-        	content += "<span class='subtitle'>Instagram pics at this place:</span><br><br>"
-        	content += "<div class='infowindow'>";
-        	for (i = 0; i < 9; i++){
-        		content += '<img src="img/loading.gif" class="thumbs" id="thumb-'+ i +'">';
-        	}
-        	content += "</div>";
-        	infowindow.setContent(content);
         	infowindow.marker = marker;
         	// Make sure the marker property is cleared if the infowindow is closed.
         	infowindow.addListener('closeclick', function() {
@@ -447,9 +440,20 @@ function populateInfoWindow(marker, infowindow){
         		dataType: "jsonp",
         		type: "GET",
         		data: {access_token: loggedIn(url), lat: marker.position.lat, lng: marker.position.lng},
-        		success: function(data){
+        		beforeSend: function(){
+        			var content = "<span>" + marker.title +" </span><br><span class='subtitle'>" + marker.description + "</span><hr>";
+		        	content += "<span class='subtitle'>Instagram pics at this place:</span><br><br>"
+		        	content += "<div class='infowindow'>";
+		        	for (i = 0; i < 9; i++){
+		        		content += '<img src="img/loading.gif" class="thumbs" id="thumb-'+ i +'">';
+		        	}
+		        	content += "</div>";
+		        	infowindow.setContent(content);
+        		},
+        		timeout: 3000
+        	}).done(function(data){
         			//get the id of the first place in the list
-        			if (loggedIn(url) && data.meta.code == 200){
+	    			if (loggedIn(url) && data.meta.code == 200){
 	        			var placeId = data.data[0].id;
 	        			//request the recent media of the place
 	        			$.ajax({
@@ -458,7 +462,8 @@ function populateInfoWindow(marker, infowindow){
 	        				type: "GET",
 	        				//had to use a diferent token for authorization purpose
 	        				data: {access_token: loggedIn(url)},
-	        				success: function(data){
+	        				timeout: 3000
+	        			}).done(function(data){
 	        					console.log(data);
 	        					if (data.meta.code == 200){
 		        					for (i = 0; i < 9; i++){
@@ -472,19 +477,17 @@ function populateInfoWindow(marker, infowindow){
 	        					} else {
 	        						instaInfoError(data, infowindow);
 	        					}
-	        				}
 	        			}).fail(function(){
-	        				instaInfoError(data, infowindow);
+	        				instaInfoError();
 	        			});
-        			} else {
-        				infowindow.setContent('<div style="width: 150px"><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
-        			}
-        		}
+	    			} else {
+	    				infowindow.setContent('<div style="width: 150px"><a href="http://www.instagram.com/oauth/authorize/?client_id=b341fc6acf6d4a8ba5e12eb3556c4def&redirect_uri=http://localhost:8000&response_type=token&scope=basic+public_content" class="fa fa-instagram" style="text-align:center"> <span style="font-family: Roboto;"> | SignUp</span></a></div>');
+	    			}
         	}).fail(function(data){
-        		instaInfoError(data, infowindow);
+        		instaInfoError();
         	});
-        	infowindow.open(map, marker);
-		}
+        infowindow.open(map, marker);
+	}
 }
 
 //search for substrings withi a string
